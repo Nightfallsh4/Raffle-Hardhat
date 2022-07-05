@@ -155,4 +155,23 @@ const {
                     await expect(raffle.performUpkeep([])).to.emit(raffle, "RequestedRaffleWinner")
                 })
             })
+
+			describe("fulfillRandomWords", function () {
+				beforeEach(async function () {
+					await raffle.enterRaffle({value: networkConfig[chainId]["entranceFee"]})
+					await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+					await network.provider.send("evm_mine",[])
+				})
+
+				it("Can only be called after performUpkeep",async function () {
+					await expect(vrfCoordinatorV2Mock.fulfillRandomWords(0, raffle.address)).to.be.revertedWith("nonexistent request")
+					await expect(vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address)).to.be.revertedWith("nonexistent request")
+
+				})
+
+				it("picks winner, resets lottery, and sends money", async function () {
+					const additionalEntrants = 3
+					const startingAccountIndex = 1
+				})
+			})
 	  })
